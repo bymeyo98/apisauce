@@ -1,4 +1,5 @@
 import { AxiosInstance, AxiosRequestConfig, AxiosError, CancelTokenStatic } from 'axios'
+import { AxiosCacheInstance, CacheRequestConfig } from 'axios-cache-interceptor'
 
 export type HEADERS = { [key: string]: string }
 export const DEFAULT_HEADERS: {
@@ -25,7 +26,7 @@ export type PROBLEM_CODE =
 
 export interface ApisauceConfig extends AxiosRequestConfig {
   baseURL: string | undefined
-  axiosInstance?: AxiosInstance
+  axiosInstance?: AxiosInstance | AxiosCacheInstance
 }
 
 /**
@@ -42,7 +43,7 @@ export interface ApiErrorResponse<T> {
   data?: T
   status?: number
   headers?: HEADERS
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig | CacheRequestConfig
   duration?: number
 }
 export interface ApiOkResponse<T> {
@@ -53,23 +54,23 @@ export interface ApiOkResponse<T> {
   data?: T
   status?: number
   headers?: HEADERS
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig | CacheRequestConfig
   duration?: number
 }
 export type ApiResponse<T, U = T> = ApiErrorResponse<U> | ApiOkResponse<T>
 
 export type Monitor = (response: ApiResponse<any>) => void
-export type RequestTransform = (request: AxiosRequestConfig) => void
+export type RequestTransform = (request: AxiosRequestConfig | CacheRequestConfig) => void
 export type AsyncRequestTransform = (
-  request: AxiosRequestConfig,
-) => Promise<void> | ((request: AxiosRequestConfig) => Promise<void>)
+  request: AxiosRequestConfig | CacheRequestConfig,
+) => Promise<void> | ((request: AxiosRequestConfig | CacheRequestConfig) => Promise<void>)
 export type ResponseTransform = (response: ApiResponse<any>) => void
 export type AsyncResponseTransform = (
   response: ApiResponse<any>,
 ) => Promise<void> | ((response: ApiResponse<any>) => Promise<void>)
 
 export interface ApisauceInstance {
-  axiosInstance: AxiosInstance
+  axiosInstance: AxiosInstance | AxiosCacheInstance
 
   monitors: Monitor
   addMonitor: (monitor: Monitor) => void
@@ -84,24 +85,56 @@ export interface ApisauceInstance {
   addAsyncResponseTransform: (transform: AsyncResponseTransform) => void
 
   headers: HEADERS
-  setHeader: (key: string, value: string) => AxiosInstance
-  setHeaders: (headers: HEADERS) => AxiosInstance
-  deleteHeader: (name: string) => AxiosInstance
+  setHeader: (key: string, value: string) => AxiosInstance | AxiosCacheInstance
+  setHeaders: (headers: HEADERS) => AxiosInstance | AxiosCacheInstance
+  deleteHeader: (name: string) => AxiosInstance | AxiosCacheInstance
 
   /** Sets a new base URL */
-  setBaseURL: (baseUrl: string) => AxiosInstance
+  setBaseURL: (baseUrl: string) => AxiosInstance | AxiosCacheInstance
   /** Gets the current base URL used by axios */
   getBaseURL: () => string
 
-  any: <T, U = T>(config: AxiosRequestConfig) => Promise<ApiResponse<T, U>>
-  get: <T, U = T>(url: string, params?: {}, axiosConfig?: AxiosRequestConfig) => Promise<ApiResponse<T, U>>
-  delete: <T, U = T>(url: string, params?: {}, axiosConfig?: AxiosRequestConfig) => Promise<ApiResponse<T, U>>
-  head: <T, U = T>(url: string, params?: {}, axiosConfig?: AxiosRequestConfig) => Promise<ApiResponse<T, U>>
-  post: <T, U = T>(url: string, data?: any, axiosConfig?: AxiosRequestConfig) => Promise<ApiResponse<T, U>>
-  put: <T, U = T>(url: string, data?: any, axiosConfig?: AxiosRequestConfig) => Promise<ApiResponse<T, U>>
-  patch: <T, U = T>(url: string, data?: any, axiosConfig?: AxiosRequestConfig) => Promise<ApiResponse<T, U>>
-  link: <T, U = T>(url: string, params?: {}, axiosConfig?: AxiosRequestConfig) => Promise<ApiResponse<T, U>>
-  unlink: <T, U = T>(url: string, params?: {}, axiosConfig?: AxiosRequestConfig) => Promise<ApiResponse<T, U>>
+  any: <T, U = T>(config: AxiosRequestConfig | CacheRequestConfig) => Promise<ApiResponse<T, U>>
+  get: <T, U = T>(
+    url: string,
+    params?: {},
+    axiosConfig?: AxiosRequestConfig | CacheRequestConfig,
+  ) => Promise<ApiResponse<T, U>>
+  delete: <T, U = T>(
+    url: string,
+    params?: {},
+    axiosConfig?: AxiosRequestConfig | CacheRequestConfig,
+  ) => Promise<ApiResponse<T, U>>
+  head: <T, U = T>(
+    url: string,
+    params?: {},
+    axiosConfig?: AxiosRequestConfig | CacheRequestConfig,
+  ) => Promise<ApiResponse<T, U>>
+  post: <T, U = T>(
+    url: string,
+    data?: any,
+    axiosConfig?: AxiosRequestConfig | CacheRequestConfig,
+  ) => Promise<ApiResponse<T, U>>
+  put: <T, U = T>(
+    url: string,
+    data?: any,
+    axiosConfig?: AxiosRequestConfig | CacheRequestConfig,
+  ) => Promise<ApiResponse<T, U>>
+  patch: <T, U = T>(
+    url: string,
+    data?: any,
+    axiosConfig?: AxiosRequestConfig | CacheRequestConfig,
+  ) => Promise<ApiResponse<T, U>>
+  link: <T, U = T>(
+    url: string,
+    params?: {},
+    axiosConfig?: AxiosRequestConfig | CacheRequestConfig,
+  ) => Promise<ApiResponse<T, U>>
+  unlink: <T, U = T>(
+    url: string,
+    params?: {},
+    axiosConfig?: AxiosRequestConfig | CacheRequestConfig,
+  ) => Promise<ApiResponse<T, U>>
 }
 
 export function isCancel(value: any): boolean
